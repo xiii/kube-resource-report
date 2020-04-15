@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-import pydevd_pycharm
 from pathlib import Path
 
 import click
@@ -9,7 +8,9 @@ import click
 from .cluster_discovery import DEFAULT_CLUSTERS
 from .report import generate_report
 
-pydevd_pycharm.settrace("localhost", stdoutToServer=True, stderrToServer=True)
+# import pydevd_pycharm
+
+# pydevd_pycharm.settrace("localhost", stdoutToServer=True, stderrToServer=True)
 
 
 class CommaSeparatedValues(click.ParamType):

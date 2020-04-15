@@ -41,13 +41,20 @@ NODE_LABEL_INSTANCE_TYPE = os.environ.get(
 
 # https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
 OBJECT_LABEL_APPLICATION = os.environ.get(
-    "OBJECT_LABEL_APPLICATION", "application,app,app.kubernetes.io/name"
+    "OBJECT_LABEL_APPLICATION", "name,k8s-app,application,app,app.kubernetes.io/name"
 ).split(",")
 OBJECT_LABEL_COMPONENT = os.environ.get(
     "OBJECT_LABEL_COMPONENT", "component,app.kubernetes.io/component"
 ).split(",")
-OBJECT_LABEL_TEAM = os.environ.get("OBJECT_LABEL_TEAM", "team,owner").split(",")
-
+OBJECT_LABEL_TEAM = os.environ.get(
+    "OBJECT_LABEL_TEAM", "app.kubernetes.io/managed-by,team,owner"
+).split(",")
+OBJECT_LABEL_PART_OF = os.environ.get(
+    "OBJECT_LABEL_PART_OF", "app.kubernetes.io/part-of"
+)
+OBJECT_LABEL_COSTCODE = os.environ.get(
+    "OBJECT_LABEL_COSTCODE", "costcode,app.kubernetes.io/costcode"
+).split(",")
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +83,13 @@ def get_component_from_labels(labels):
 
 def get_team_from_labels(labels):
     for label_name in OBJECT_LABEL_TEAM:
+        if label_name in labels:
+            return labels[label_name]
+    return ""
+
+
+def get_costcode_from_labels(labels):
+    for label_name in OBJECT_LABEL_COSTCODE:
         if label_name in labels:
             return labels[label_name]
     return ""
@@ -180,6 +194,7 @@ def map_pod(pod: Pod, cost_per_cpu: float, cost_per_memory: float):
     application = get_application_from_labels(pod.labels)
     component = get_component_from_labels(pod.labels)
     team = get_team_from_labels(pod.labels)
+    costcode = get_costcode_from_labels(pod.labels)
     requests: Dict[str, float] = collections.defaultdict(float)
     container_images = []
     for container in pod.obj["spec"]["containers"]:
@@ -195,6 +210,7 @@ def map_pod(pod: Pod, cost_per_cpu: float, cost_per_memory: float):
         "requests": requests,
         "application": application,
         "component": component,
+        "costcode": costcode,
         "container_images": container_images,
         "cost": cost,
         "usage": new_resources(),

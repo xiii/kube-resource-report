@@ -21,6 +21,7 @@
                   <th>Name</th>
                   <th>Application</th>
                   <th>Component</th>
+                  <th>Costcode</th>
                   <th><abbr title="CPU Requests">CR</abbr></th>
                   <th><abbr title="Memory Requests">MR</abbr></th>
                   <th>CPU</th>
@@ -40,6 +41,7 @@
             <td>{{ namespace_name[1] }}</td>
             <td>{{ pod.application }}</td>
             <td>{{ pod.component }}</td>
+            <td>{{ pod.costcode }}</td>
             <td>{{ pod.requests.cpu|round(3) }}</td>
             <td data-value="{{ pod.requests.memory }}">{{ pod.requests.memory|filesizeformat(True) }}</td>
 
