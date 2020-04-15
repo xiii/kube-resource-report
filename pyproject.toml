@@ -12,6 +12,7 @@ pykube-ng = "*"
 requests = "*"
 requests-futures = "*"
 stups-tokens = "*"
+pydevd-pycharm = "^201.6668.115"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^19.10b0", allow-prereleases = true}

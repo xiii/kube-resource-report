@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from typing import List
 from urllib.parse import urljoin
-
+import os
 import requests
 import tokens
 from pykube import HTTPClient
@@ -18,6 +18,11 @@ CLUSTER_ID_INVALID_CHARS = re.compile("[^a-z0-9:-]")
 logger = logging.getLogger(__name__)
 
 tokens.configure(from_file_only=True)
+
+product = os.getenv("_PRODUCT", "NO_PRODUCT")
+ecosystem = os.getenv("_ECOSYSTEM", "NO_ECOSYSTEM")
+environment = os.getenv("_ENVIRONMENT", "NO_ENVIRONMENT")
+itv_cluster_name = product + "-" + ecosystem + "-" + environment
 
 
 def generate_cluster_id(url: str):
@@ -145,8 +150,12 @@ class KubeconfigDiscoverer:
             # create a new KubeConfig with new "current context"
             context_config = KubeConfig(config.doc, context)
             client = HTTPClient(context_config)
+
             cluster = Cluster(
-                context, context, context_config.cluster["server"], client
+                itv_cluster_name,
+                itv_cluster_name,
+                context_config.cluster["server"],
+                client,
             )
             yield cluster
 
