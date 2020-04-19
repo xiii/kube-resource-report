@@ -70,7 +70,7 @@ class StaticClusterDiscoverer:
                 client = HTTPClient(config)
                 cluster = Cluster(
                     generate_cluster_id(DEFAULT_CLUSTERS),
-                    "cluster",
+                    itv_cluster_name,
                     DEFAULT_CLUSTERS,
                     client,
                 )
@@ -78,7 +78,7 @@ class StaticClusterDiscoverer:
                 client = HTTPClient(config)
                 cluster = Cluster(
                     generate_cluster_id(config.cluster["server"]),
-                    "cluster",
+                    itv_cluster_name,
                     config.cluster["server"],
                     client,
                 )
