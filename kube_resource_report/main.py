@@ -12,6 +12,9 @@ from .report import generate_report
 
 # pydevd_pycharm.settrace("localhost", stdoutToServer=True, stderrToServer=True)
 
+from prometheus_client import start_http_server
+start_http_server(8000)
+
 
 class CommaSeparatedValues(click.ParamType):
     name = "comma_separated_values"
