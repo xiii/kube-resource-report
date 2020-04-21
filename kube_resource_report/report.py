@@ -5,6 +5,7 @@ import csv
 import datetime
 import json
 import logging
+import os
 import pickle
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -15,6 +16,7 @@ from typing import List
 
 import requests
 import yaml
+from google.cloud import bigquery
 from requests_futures.sessions import FuturesSession
 
 from .output import OutputManager
@@ -32,6 +34,9 @@ from kube_resource_report import pricing
 session = requests.Session()
 # set a friendly user agent for outgoing HTTP requests
 session.headers["User-Agent"] = f"kube-resource-report/{__version__}"
+product = os.getenv("_PRODUCT", "NO_PRODUCT")
+ecosystem = os.getenv("_ECOSYSTEM", "NO_ECOSYSTEM")
+environment = os.getenv("_ENVIRONMENT", "NO_ENVIRONMENT")
 
 
 def json_default(obj):
@@ -405,6 +410,9 @@ def generate_report(
         cluster_summaries,
         namespace_usage,
         applications,
+        product,
+        ecosystem,
+        environment,
         teams,
         node_labels,
         links,
@@ -433,6 +441,9 @@ def write_report(
     cluster_summaries,
     namespace_usage,
     applications,
+    product,
+    ecosystem,
+    environment,
     teams,
     node_labels,
     links,
@@ -642,6 +653,31 @@ def write_report(
                     memory_slack[(namespace, application)] += (
                         requests["memory"] - usage["memory"]
                     )
+                    timestamp = datetime.datetime.now()
+                    export_items_to_bigquery(
+                        (
+                            timestamp.strftime("%s"),
+                            cluster_id,
+                            product,
+                            ecosystem,
+                            environment,
+                            summary["cluster"].api_server_url,
+                            namespace,
+                            name,
+                            pod["application"],
+                            pod["component"],
+                            pod["costcode"],
+                            ", ".join(pod["container_images"]),
+                            requests["cpu"],
+                            requests["memory"],
+                            usage["cpu"],
+                            usage["memory"],
+                            recommendation["cpu"] if recommendation else "",
+                            recommendation["memory"] if recommendation else "",
+                            pod["cost"],
+                            pod["slack_cost"],
+                        )
+                    )
                     writer.writerow(
                         [
                             cluster_id,
@@ -748,6 +784,7 @@ def write_report(
         file_name = f"{page}.html"
         context["page"] = page
         context["alpha_ema"] = alpha_ema
+
         out.render_template(file_name, context, file_name)
 
     for cluster_id, summary in cluster_summaries.items():
@@ -873,3 +910,22 @@ def write_report(
         out.render_template("application.html", context, file_name)
 
     out.clean_up_stale_files()
+
+
+def export_items_to_bigquery(rows):
+    # gcp setup
+    os.environ[
+        "GOOGLE_APPLICATION_CREDENTIALS"
+    ] = "/Users/efstxago/PycharmProjects/kube-resource-report/.secret.json"
+
+    # Instantiates a client
+    bigquery_client = bigquery.Client()
+
+    # Prepares a reference to the dataset
+    dataset_ref = bigquery_client.dataset("AWSK8S")
+
+    table_ref = dataset_ref.table("ekscost")
+    table = bigquery_client.get_table(table_ref)  # API call
+    rows_to_insert = [rows]
+    errors = bigquery_client.insert_rows(table, rows_to_insert)  # API request
+    assert errors == []

@@ -14,6 +14,7 @@ requests-futures = "*"
 stups-tokens = "*"
 pydevd-pycharm = "^201.6668.115"
 prometheus_client = "^0.7.1"
+google-cloud-bigquery = "^1.24.0"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^19.10b0", allow-prereleases = true}

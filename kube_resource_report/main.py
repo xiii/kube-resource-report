@@ -4,15 +4,15 @@ import time
 from pathlib import Path
 
 import click
+from prometheus_client import start_http_server
 
 from .cluster_discovery import DEFAULT_CLUSTERS
 from .report import generate_report
 
 # import pydevd_pycharm
-
 # pydevd_pycharm.settrace("localhost", stdoutToServer=True, stderrToServer=True)
+# Start prometheus http server
 
-from prometheus_client import start_http_server
 start_http_server(8000)
 
 
