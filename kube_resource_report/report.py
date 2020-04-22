@@ -916,7 +916,7 @@ def export_items_to_bigquery(rows):
     # gcp setup
     os.environ[
         "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = "/Users/efstxago/PycharmProjects/kube-resource-report/.secret.json"
+    ] = ".secret.json"
 
     # Instantiates a client
     bigquery_client = bigquery.Client()
