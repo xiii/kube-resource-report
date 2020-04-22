@@ -914,9 +914,9 @@ def write_report(
 
 def export_items_to_bigquery(rows):
     # gcp setup
-    os.environ[
-        "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = ".secret.json"
+
+    if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") is None:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/secret/.secret.json"
 
     # Instantiates a client
     bigquery_client = bigquery.Client()
